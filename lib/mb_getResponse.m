@@ -66,14 +66,6 @@ while GetSecs < (currSeqStartTime+cfg.SequenceDur)
             responseEvents(cTap,1).minLHL24   = currSeq(currPatIdx).minLHL24;
             responseEvents(cTap,1).rangeLHL24 = currSeq(currPatIdx).rangeLHL24;
             
-            % ----- log tsv -----
-            % now we have some time before the subject taps again so let's
-            % write to the log file            
-            % each tap on one row (colum names: subjectNum, runNum, expParam.seqi, tapOnset)
-%             saveOutput(cfg, expParam, 'updateTap',tapTime);
-            %saveOutput(cfg, expParam, 'updateTap',responseEvents);
-            
-            % -----------------
             
             % increase tap counter
             cTap = cTap+1; 

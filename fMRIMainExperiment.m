@@ -13,6 +13,12 @@ addpath(genpath(fullfile(pwd, 'lib')))
 
 
 % Get parameters
+
+% % %
+% provide here to specifiy the sequence length and/or call getParamsMainExp
+% in here with the arguments for rhythmic sequence, control1 and control2
+% designs
+% % %
 [cfg,expParam] = getParams('tapMainExp');
 
 % set and load all the subject input to run the experiment
@@ -21,8 +27,8 @@ expParam = createFilename(cfg,expParam);
 
 
 
-% get time point at the beginning of the experiment (machine time)
-expParam.experimentStartTime = GetSecs();
+% get time point at the beginning of the script (machine time)
+expParam.scriptStartTime = GetSecs();
 
 %% Experiment
 
@@ -32,36 +38,53 @@ try
     [cfg] = initPTB(cfg);
 
     
+    
     % Prepare for the output logfiles - BIDS
+    % saving 2 arrays long-form
+    % open events logfile
     logFile  = saveEventsFile('open', expParam,[],'sequenceNum',...
         'segmentNum','segmentOnset','stepNum','stepOnset','patternID',...
-        'category','F0','gridIOI','patternAmp','PE4','minPE4',...
-        'rangePE4','LHL24','minLHL24','rangeLHL24');
-
+        'category','F0','gridIOI','patternAmp','PE4_01', 'PE4_02',...
+        'PE4_03', 'PE4_04', 'PE4_05', 'PE4_06','PE4_07', 'PE4_08',...
+        'PE4_09', 'PE4_10', 'PE4_11', 'PE4_12','minPE4','rangePE4',...
+        'LHL24_01', 'LHL24_02', 'LHL24_03', 'LHL24_04', 'LHL24_05',...
+        'LHL24_06','LHL24_07', 'LHL24_08', 'LHL24_09', 'LHL24_10',...
+        'LHL24_11', 'LHL24_12', 'minLHL24','rangeLHL24');
     
-    % show instructions and do initial volume setting
-    currInstrPage = 1; 
-    nInstrPages = length(expParam.introInstruction); 
-    while 1
-        % display instructions and wait for action
-        subAction = displayInstr(expParam.introInstruction{currInstrPage}, cfg, 'setVolumePrevNext', ...
-                                 'currInstrPage', currInstrPage, ...
-                                 'nInstrPages', nInstrPages); 
-        % go one instruction page forward or backward (depending on subject's action)                      
-        if strcmp(subAction,'oneInstrPageForward')
-            currInstrPage = min(currInstrPage+1, length(expParam.introInstruction)); 
-        elseif strcmp(subAction,'oneInstrPageBack')
-            currInstrPage = max(currInstrPage-1, 1); 
-        elseif strcmp(subAction,'done')
-            break
-        end
+    % open stimulation logfile - used for counting button press
+    countFile  = saveEventsFile('open_stim', expParam,[],'target',...
+        'key_name','pressed');
+
+
+    % Show instructions for fMRI task
+    if expParam.fmriTask
+        displayInstr(expParam.fmriTaskInst,cfg);
     end
-        
-    % more instructions
-    displayInstr(expParam.trialDurInstruction,cfg,'setVolume');
+    
+    % wait for space key to be pressed by the experimenter
+    % to make the script more verbose
+    pressSpace4me
+    
+    % prepare the KbQueue to collect responses
+    % it's after space keypressed because the key looked for is "space" for
+    % now
+    getResponse('init', cfg, expParam);
+    getResponse('start',cfg,expParam);
+    
+    % wait for trigger from fMRI
+    wait4Trigger(cfg);
 
+    % show fixation cross 
+    if expParam.fmriTask
+        drawFixationCross(cfg,expParam, expParam.fixationCrossColor);
+        Screen('Flip',cfg.win);
+    end
+    
 
-    % if there's wait time,..wait
+    % wait for dummy fMRI scans
+    % and collect the timestamp
+    expParam.experimentStart = GetSecs;
+    
     WaitSecs(expParam.onsetDelay);
     
     
@@ -71,9 +94,6 @@ try
 
         currSeq = struct();
         responseEvents = struct();
-        
-        % change screen to "TAP" instruction
-        displayInstr('TAP',cfg,'instrAndQuitOption');
 
         % construct sequence
         currSeq = makeSequence(cfg,seqi);
@@ -86,7 +106,7 @@ try
         currSeq(1).fileID = logFile.fileID;
         
         % adding columns in currSeq for BIDS format
-        for iPattern=1:length(currSeq)
+        for iPattern = 1:length(currSeq)
             currSeq(iPattern,1).trial_type  = 'dummy';
             currSeq(iPattern,1).duration    = 0;
             currSeq(iPattern,1).sequenceNum = seqi;            
@@ -98,10 +118,10 @@ try
         'rangePE4','LHL24','minLHL24','rangeLHL24');
 
 
-        %% present stimulus, record tapping
+        %% present stimulus, accidential button press during the sequence
 
         % response save for BIDS (set up)
-        responseEvents.fileID = logFile.fileID;            
+        responseEvents(1).fileID = logFile.fileID;            
 
         % fill the buffer
         PsychPortAudio('FillBuffer', cfg.pahandle, [currSeq.outAudio;currSeq.outAudio]);
@@ -115,6 +135,7 @@ try
         expParam.seqi = seqi;
         expParam.currSeqStartTime = currSeqStartTime;
         
+        % record response in case accidential press
         [tapOnsets, responseEvents] = mb_getResponse(cfg, ...
             expParam, ...
             responseEvents, ...
@@ -123,14 +144,12 @@ try
         
         % response save for BIDS (write)
         if isfield(responseEvents,'onset')
-            
-            
+
             saveEventsFile('save', expParam, responseEvents,'sequenceNum',...
                 'segmentNum','segmentOnset','stepNum','stepOnset','patternID',...
                 'segmCateg','F0','gridIOI','patternAmp','PE4','minPE4',...
                 'rangePE4','LHL24','minLHL24','rangeLHL24');
 
-    
         end
         
         % ===========================================
@@ -152,51 +171,81 @@ try
         expParam.data(seqi).taps = tapOnsets;
 
 
-
-        %% Pause
-        if seqi<expParam.numSequences
-            
-            % pause (before next sequence starts, wait for key to continue)
-            if expParam.sequenceDelay 
-                
-                % show sequence-specific instruction if there is some
-                % defined
-                if ~isempty(expParam.seqSpecificDelayInstruction{seqi})
-                    displayInstr(expParam.seqSpecificDelayInstruction{seqi}, ...
-                                 cfg, ...
-                                 'setVolumeToggleGeneralInstr', ...
-                                 'generalInstrTxt', expParam.generalInstruction);
-                end
-                
-                % show general instruction after each sequence
-                fbkToDisp = sprintf(expParam.generalDelayInstruction, seqi, expParam.numSequences);
-                displayInstr(fbkToDisp, ...
-                             cfg, ...
-                             'setVolumeToggleGeneralInstr', ...
-                             'generalInstrTxt', expParam.generalInstruction);
-                
-                % pause for N secs before starting next sequence
-                WaitSecs(expParam.pauseSeq);
-            end
-            
-        else
-            
-            % end of experient
-            displayInstr('DONE. \n\n\nTHANK YOU FOR PARTICIPATING :)',cfg);
-            
-            % wait 3 seconds and end the experiment
-            WaitSecs(3);
-            
-        end
-
     end % sequence loop
 
+    % flush the previous button presses
+    getResponse('flush', cfg, expParam);
+    
+    % wait while fMRI is ongoing
+    WaitSecs(expParam.endDelay);
 
+    % % %
+    % give visual feedback?
+    % % %
+    displayInstr('Please indicate by pressing button, how many times you detected pitch changes\n\n\n',cfg);
+    
+    %start buffering the button presses
+    getResponse('start',cfg,expParam);
+    
 
+    % wait 3 seconds for participant to press button
+    WaitSecs(expParam.endResponseDelay);
+    
+    % write down buffered responses
+    countEvents = getResponse('check', cfg, expParam,1);
+    
+    % atm, there's NANs in countEvents not sure why, so I'm deleting nans
+    if isfield(countEvents,'onset')
+        
+        temp = struct(); 
+        temp.fileID = countFile.fileID;
+
+        count = 1;
+        
+        for iResp = 1:size(countEvents,1)
+            if (~isnan(countEvents(iResp).onset))
+                temp(count,1).onset = countEvents(iResp).onset - expParam.experimentStart;
+                temp(count,1).trial_type = countEvents(iResp).trial_type;
+                temp(count,1).duration = countEvents(iResp).duration;
+                temp(count,1).key_name = countEvents(iResp).key_name;
+                temp(count,1).pressed = countEvents(iResp).pressed;
+                temp(count,1).target = 8; % assign the correct target number
+                
+                count = count +1;
+            end
+        end
+    end
+    
+    countEvents = struct();
+    countEvents = temp;
+    
+    saveEventsFile('save', expParam,countEvents,...
+        'key_name','pressed','target');
+    
+    %clear countEvents 
+
+    
+    % stop key checks
+    getResponse('stop', cfg, expParam);
+    
+
+    
+    % % make a if loop for the finaly run: 
+    if expParam.runNb == 666 %change this with the known final run#
+        displayInstr('DONE. \n\n\nTHANK YOU FOR PARTICIPATING :)\n\n\n Soon we will take you out!',cfg);
+    else
+        displayInstr('This run is over. We will shortly start the following!',cfg);
+    end
+    
+
+    % wait 2 seconds for ending the screen/exp
+    WaitSecs(expParam.endScreenDelay);
+    
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', expParam, logFile);
-    
-    
+    saveEventsFile('close', expParam, countFile);
+
+
     % save the whole workspace 
     matFile = fullfile(expParam.outputDir, strrep(expParam.fileName.events,'tsv', 'mat'));
     if IsOctave
@@ -204,7 +253,6 @@ try
     else
         save(matFile, '-v7.3');
     end
-    
     
     % clean the workspace
     cleanUp(cfg);
@@ -223,6 +271,7 @@ catch
     
     % Close the logfiles - BIDS
     saveEventsFile('close', expParam, logFile);
+    saveEventsFile('close', expParam, countFile);
 
     % clean the workspace
     cleanUp(cfg);

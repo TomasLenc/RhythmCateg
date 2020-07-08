@@ -8,21 +8,6 @@ function     [cfg,expParam] = getMainExpParameters(cfg,expParam)
 % % %
 
 
-% wait before running the exp
-expParam.onsetDelay = 0;
-
-%wait in between sequences? y/n
-expParam.sequenceDelay = 1;
-
-% give a pause of below seconds in between sequences
-expParam.pauseSeq = 1; 
-
-% define ideal number of sequences to be made
-if cfg.debug
-    expParam.numSequences = 2; % multiples of 3
-else
-    expParam.numSequences = 6;
-end
 
 %% contruct individual sound events (that will make up each pattern)
 
@@ -200,6 +185,14 @@ cfg.volumeSettingSound = repmat(makeStimMainExp(ones(1,16), cfg,...
 
 
 %% Task Instructions
+
+% fMRI instructions
+expParam.fmriTaskInst = ['Fixate to the cross & count the deviant tone\n \n\n'];
+
+
+
+
+% behavioral instructions
 
 loadPathInstr = fullfile('lib','instr','mainExp'); 
 
