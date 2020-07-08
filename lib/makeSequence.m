@@ -248,7 +248,7 @@ for stepi=1:cfg.nStepsPerSequence
             % get pattern info e.g. PE and LHL
             seq(cPat,1).PE4        = patterns2choose(currPatIdx).PE4;
             seq(cPat,1).minPE4     = patterns2choose(currPatIdx).minPE4;
-            seq(cPat,1).rangePE4        = patterns2choose(currPatIdx).rangePE4;
+            seq(cPat,1).rangePE4   = patterns2choose(currPatIdx).rangePE4;
             seq(cPat,1).LHL24      = patterns2choose(currPatIdx).LHL24;
             seq(cPat,1).minLHL24   = patterns2choose(currPatIdx).minLHL24;
             seq(cPat,1).rangeLHL24 = patterns2choose(currPatIdx).rangeLHL24;

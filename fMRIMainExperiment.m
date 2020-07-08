@@ -4,7 +4,7 @@
 if ~ismac
     close all;
     clear Screen;
-else 
+else
     clc; clear;
 end
 
@@ -25,8 +25,6 @@ addpath(genpath(fullfile(pwd, 'lib')))
 expParam = userInputs(cfg,expParam);
 expParam = createFilename(cfg,expParam);
 
-
-
 % get time point at the beginning of the script (machine time)
 expParam.scriptStartTime = GetSecs();
 
@@ -36,9 +34,8 @@ expParam.scriptStartTime = GetSecs();
 try
     % Init the experiment
     [cfg] = initPTB(cfg);
+    
 
-    
-    
     % Prepare for the output logfiles - BIDS
     % saving 2 arrays long-form
     % open events logfile
@@ -52,10 +49,10 @@ try
         'LHL24_11', 'LHL24_12', 'minLHL24','rangeLHL24');
     
     % open stimulation logfile - used for counting button press
-    countFile  = saveEventsFile('open_stim', expParam,[],'target',...
-        'key_name','pressed');
-
-
+    countFile  = saveEventsFile('open_stim', expParam,[],...
+        'key_name','pressed','target');
+    
+    
     % Show instructions for fMRI task
     if expParam.fmriTask
         displayInstr(expParam.fmriTaskInst,cfg);
@@ -66,140 +63,130 @@ try
     pressSpace4me
     
     % prepare the KbQueue to collect responses
-    % it's after space keypressed because the key looked for is "space" for
-    % now
+    % it's after space keypressed because the key looked for is "space" atm
     getResponse('init', cfg, expParam);
     getResponse('start',cfg,expParam);
     
     % wait for trigger from fMRI
     wait4Trigger(cfg);
-
-    % show fixation cross 
+    
+    % show fixation cross
     if expParam.fmriTask
         drawFixationCross(cfg,expParam, expParam.fixationCrossColor);
         Screen('Flip',cfg.win);
     end
     
 
-    % wait for dummy fMRI scans
     % and collect the timestamp
     expParam.experimentStart = GetSecs;
     
+    % wait for dummy fMRI scans
     WaitSecs(expParam.onsetDelay);
     
-    
-    
+
     %% play sequences
     for seqi = 1:expParam.numSequences
-
+        
+        % prep for BIDS saving structures
         currSeq = struct();
         responseEvents = struct();
-
+        
         % construct sequence
         currSeq = makeSequence(cfg,seqi);
-
         
+        
+        % fill the buffer
+        PsychPortAudio('FillBuffer', cfg.pahandle, [currSeq.outAudio;currSeq.outAudio]);
+        
+        % start playing
+        currSeqStartTime = PsychPortAudio('Start', cfg.pahandle, cfg.PTBrepet,...
+            cfg.PTBstartCue, cfg.PTBwaitForDevice);
+        
+        % save params for later call in BIDS saving
+        expParam.seqi = seqi;
+        expParam.currSeqStartTime = currSeqStartTime;
+
         % ===========================================
         % stimulus save for BIDS
         % ===========================================
-        % we save sequence by sequence so we clear this variable every loop
+        
+        % open a file to write sequencefor BIDS
         currSeq(1).fileID = logFile.fileID;
         
         % adding columns in currSeq for BIDS format
         for iPattern = 1:length(currSeq)
+            
+            %correcting onsets for fMRI trigger onset
+            currSeq(iPattern,1).onset  = currSeq(iPattern,1).onset + ...
+                expParam.currSeqStartTime - expParam.experimentStart;
+            currSeq(iPattern,1).segmentOnset = currSeq(iPattern,1).segmentOnset...
+                + expParam.currSeqStartTime - expParam.experimentStart;
+            
+            %adding compulsory BIDS structures
             currSeq(iPattern,1).trial_type  = 'dummy';
             currSeq(iPattern,1).duration    = 0;
-            currSeq(iPattern,1).sequenceNum = seqi;            
+            %
+            currSeq(iPattern,1).sequenceNum = seqi;
+            
         end
         
         saveEventsFile('save', expParam, currSeq,'sequenceNum',...
-        'segmentNum','segmentOnset','stepNum','stepOnset','patternID',...
-        'segmCateg','F0','gridIOI','patternAmp','PE4','minPE4',...
-        'rangePE4','LHL24','minLHL24','rangeLHL24');
+            'segmentNum','segmentOnset','stepNum','stepOnset','patternID',...
+            'segmCateg','F0','gridIOI','patternAmp','PE4','minPE4',...
+            'rangePE4','LHL24','minLHL24','rangeLHL24');
 
-
-        %% present stimulus, accidential button press during the sequence
-
-        % response save for BIDS (set up)
-        responseEvents(1).fileID = logFile.fileID;            
-
-        % fill the buffer
-        PsychPortAudio('FillBuffer', cfg.pahandle, [currSeq.outAudio;currSeq.outAudio]);
-
-        % start playing
-        currSeqStartTime = PsychPortAudio('Start', cfg.pahandle, cfg.PTBrepet,...
-            cfg.PTBstartCue, cfg.PTBwaitForDevice);
-
-        
-        % keep collecting tapping until sound stops (log as you go)
-        expParam.seqi = seqi;
-        expParam.currSeqStartTime = currSeqStartTime;
-        
-        % record response in case accidential press
-        [tapOnsets, responseEvents] = mb_getResponse(cfg, ...
-            expParam, ...
-            responseEvents, ...
-            currSeq);
-        
-        
-        % response save for BIDS (write)
-        if isfield(responseEvents,'onset')
-
-            saveEventsFile('save', expParam, responseEvents,'sequenceNum',...
-                'segmentNum','segmentOnset','stepNum','stepOnset','patternID',...
-                'segmCateg','F0','gridIOI','patternAmp','PE4','minPE4',...
-                'rangePE4','LHL24','minLHL24','rangeLHL24');
-
-        end
-        
         % ===========================================
         % log everything into matlab structure
         % ===========================================
-
+        
         % save (machine) onset time for the current sequence
         expParam.data(seqi).currSeqStartTime = currSeqStartTime;
-
+        
         % save PTB volume
+        % might be irrelevant for fMRI
         expParam.data(seqi).ptbVolume = PsychPortAudio('Volume',cfg.pahandle);
-
+        
         % save current sequence information (without the audio, which can
         % be easily resynthesized)
         currSeq(1).outAudio = [];
         expParam.data(seqi).seq = currSeq;
+        
+        
+    end
 
-        % save all the taps for this sequence
-        expParam.data(seqi).taps = tapOnsets;
-
-
-    end % sequence loop
-
-    % flush the previous button presses
-    getResponse('flush', cfg, expParam);
     
+    %% Wait for audio and delays to catch up
     % wait while fMRI is ongoing
-    WaitSecs(expParam.endDelay);
-
+    % stay here till audio stops
+    reachHereTime = (GetSecs - expParam.experimentStart);
+    audioDuration = (cfg.SequenceDur*expParam.numSequences);
+    
+    % exp duration + delays - script reaching to till point
+    WaitSecs(audioDuration + expParam.onsetDelay + expParam.endDelay ...
+        - reachHereTime);
+    
+    % record exp ending time
+    expParam.fMRIendTime = GetSecs - expParam.experimentStart;
+    
+    %% Check last button presses & wrap up
     % % %
     % give visual feedback?
     % % %
     displayInstr('Please indicate by pressing button, how many times you detected pitch changes\n\n\n',cfg);
-    
-    %start buffering the button presses
-    getResponse('start',cfg,expParam);
-    
 
-    % wait 3 seconds for participant to press button
+
+    % wait for participant to press button
     WaitSecs(expParam.endResponseDelay);
     
     % write down buffered responses
     countEvents = getResponse('check', cfg, expParam,1);
     
-    % atm, there's NANs in countEvents not sure why, so I'm deleting nans
+    % omits nans in logfile
     if isfield(countEvents,'onset')
         
-        temp = struct(); 
+        temp = struct();
         temp.fileID = countFile.fileID;
-
+        
         count = 1;
         
         for iResp = 1:size(countEvents,1)
@@ -214,39 +201,39 @@ try
                 count = count +1;
             end
         end
+        
+        countEvents = struct();
+        countEvents = temp;
+        
+        saveEventsFile('save', expParam,countEvents,...
+            'key_name','pressed','target');
+        
     end
-    
-    countEvents = struct();
-    countEvents = temp;
-    
-    saveEventsFile('save', expParam,countEvents,...
-        'key_name','pressed','target');
-    
-    %clear countEvents 
 
-    
     % stop key checks
     getResponse('stop', cfg, expParam);
     
-
-    
-    % % make a if loop for the finaly run: 
+    %% wrapping up
+    % last screen
     if expParam.runNb == 666 %change this with the known final run#
         displayInstr('DONE. \n\n\nTHANK YOU FOR PARTICIPATING :)\n\n\n Soon we will take you out!',cfg);
     else
         displayInstr('This run is over. We will shortly start the following!',cfg);
     end
     
-
-    % wait 2 seconds for ending the screen/exp
+    % wait for ending the screen/exp
     WaitSecs(expParam.endScreenDelay);
     
+    % record script ending time
+    expParam.endTime = GetSecs - expParam.experimentStart;
+    
+    %% save
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', expParam, logFile);
     saveEventsFile('close', expParam, countFile);
-
-
-    % save the whole workspace 
+    
+    
+    % save the whole workspace
     matFile = fullfile(expParam.outputDir, strrep(expParam.fileName.events,'tsv', 'mat'));
     if IsOctave
         save(matFile, '-mat7-binary');
@@ -256,11 +243,11 @@ try
     
     % clean the workspace
     cleanUp(cfg);
-
-
-
+    
+    
+    
 catch
-
+    
     % save everything into .mat file
     matFile = fullfile(expParam.outputDir, strrep(expParam.fileName.events,'tsv', 'mat'));
     if IsOctave
@@ -272,9 +259,9 @@ catch
     % Close the logfiles - BIDS
     saveEventsFile('close', expParam, logFile);
     saveEventsFile('close', expParam, countFile);
-
+    
     % clean the workspace
     cleanUp(cfg);
-
+    
     psychrethrow(psychlasterror);
 end
