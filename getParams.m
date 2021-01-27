@@ -112,6 +112,12 @@ if strcmpi(cfg.testingDevice,'mri')
     cfg.fixation.xDisplacement          = 0;    % Manual displacement of the fixation cross
     cfg.fixation.yDisplacement          = 0;    % Manual displacement of the fixation cross
     cfg.fixation.color                  = cfg.color.white;
+    
+%     cfg.ctrlscreen.idx = min(Screen('Screens'));
+%     
+%     if cfg.screen.winWidth < 1920
+%         cfg.fixation.width = .2;
+%     end
 
     %Task
     cfg.task.instruction = ['If you saw a shiny ! point, don''t mind it. It''s OK! \n\n\n'...
