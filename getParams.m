@@ -107,7 +107,7 @@ if strcmpi(cfg.testingDevice,'mri')
     %Fixation Cross
     % Used Pixels here since it really small and can be adjusted during the experiment
     cfg.fixation.type                   = 'bestFixation'; %
-    cfg.fixation.width                  = .2;   % Set the length of the lines (in Pixels) of the fixation cross
+    cfg.fixation.width                  = .1;   % Set the length of the lines (in Pixels) of the fixation cross
     cfg.fixation.lineWidthPix           = 5;    % Set the line width (in Pixels) for our fixation cross
     cfg.fixation.xDisplacement          = 0;    % Manual displacement of the fixation cross
     cfg.fixation.yDisplacement          = 0;    % Manual displacement of the fixation cross
@@ -138,10 +138,10 @@ if strcmpi(cfg.testingDevice,'mri')
     cfg.extraColumns = {'sequenceNum', 'segmentNum', 'segmentOnset', ...
     'stepNum', 'stepOnset', 'patternID', 'segmentCateg', 'F0', 'isTask', ...
     'gridIOI', 'patternAmp', 'minPE4', 'rangePE4', 'minLHL24', ...
-    'rangeLHL24', 'LHL24', 'PE4'};
+    'rangeLHL24', 'LHL24', 'PE4','keyName', 'pressed', 'target'};
 
     % response columns
-    cfg.responseExtraColumns = {'keyName', 'pressed', 'target'};
+   % cfg.responseExtraColumns = {'keyName', 'pressed', 'target'};
 
 end
 

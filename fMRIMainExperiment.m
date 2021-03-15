@@ -43,8 +43,8 @@ try
     logFile = saveEventsFile('open', cfg, logFile);
     
     % create response file - used for counting button press
-    responseFile.extraColumns = cfg.responseExtraColumns;
-    responseFile  = saveEventsFile('init_stim', cfg, responseFile);
+%     responseFile.extraColumns = cfg.responseExtraColumns;
+%     responseFile  = saveEventsFile('init_stim', cfg, responseFile);
 
     
     % Show instructions for fMRI task & wait for space press
@@ -117,7 +117,7 @@ try
     % save response & target
     cfg.target = target;
     responseEvents = collectAndSave(cfg, ...
-        responseFile, cfg.experimentStart);
+        logFile, cfg.experimentStart);
     
 
     %% wrapping up
@@ -142,7 +142,7 @@ try
     %% save
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', cfg, logFile);
-    saveEventsFile('close', cfg, responseFile);
+  %  saveEventsFile('close', cfg, responseFile);
 
     % save the whole workspace
     matFile = fullfile(cfg.dir.output, ...
