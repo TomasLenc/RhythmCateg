@@ -33,7 +33,7 @@ try
 
     % create  logfile with extra columns to save - BIDS
     logFile.extraColumns = cfg.extraColumns;
-    [logFile]  = saveEventsFile('open', cfg, logFile); %dummy initialise
+    [logFile]  = saveEventsFile('init', cfg, logFile); %dummy initialise
 
     % set the real length of columns
     logFile(1).extraColumns.LHL24.length = 12;
@@ -44,7 +44,7 @@ try
     
     % create response file - used for counting button press
     responseFile.extraColumns = cfg.responseExtraColumns;
-    responseFile  = saveEventsFile('open_stim', cfg, responseFile);
+    responseFile  = saveEventsFile('init_stim', cfg, responseFile);
 
     
     % Show instructions for fMRI task & wait for space press
