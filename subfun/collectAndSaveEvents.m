@@ -1,4 +1,4 @@
-function target = collectAndSaveEvents(cfg, logFile, currentSequence, SeqNum, audioOnset)
+function target = collectAndSaveEvents(cfg, logFile, currentSequence, SeqNum, audioOnset, task)
 
   % write into logfile
   currentSequence(1).isStim = false; 
@@ -26,6 +26,7 @@ function target = collectAndSaveEvents(cfg, logFile, currentSequence, SeqNum, au
   currentSequence(nEvents+1, 1).trial_type = 'sequence_onset'; 
   currentSequence(nEvents+1, 1).onset = audioOnset; 
   currentSequence(nEvents+1, 1).duration = cfg.pattern.SequenceDur; 
+  currentSequence(nEvents+1, 1).triggerValue = cfg.beh.trigTaskMapping(task); 
   
   saveEventsFile('save', cfg, currentSequence); 
 

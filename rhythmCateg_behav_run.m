@@ -13,14 +13,14 @@ end
 % make sure we got access to all the required functions and inputs
 initEnv();
 
-subject = 66;
+subject = 77;
 
 tasks = {'RhythmFT','RhythmBlock'};
 
 repetitionNb = 6;
 taskLabel = [1 2];
 
-runStartFrom = 3;
+runStartFrom = 1;
 runEndIn = repetitionNb;
 
 % for eve run numbered subjects, flip the order
@@ -49,3 +49,4 @@ end
 
 
 % save
+save(fullfile(fileparts(whereIsData),['sub-0',num2str(subject),'expOrder.mat']),'expOrderOfSubject');

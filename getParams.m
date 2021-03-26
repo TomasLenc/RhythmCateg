@@ -104,7 +104,7 @@ function cfg = getParams(task,cfg)
   cfg.extraColumns = {'sequenceNum', 'segmentNum', 'segmentOnset', ...
                       'stepNum', 'stepOnset', 'patternID', 'segmentCateg', 'F0', 'isTask', ...
                       'gridIOI', 'patternAmp', 'minPE4', 'rangePE4', 'minLHL24', ...
-                      'rangeLHL24', 'LHL24', 'PE4'};
+                      'rangeLHL24', 'LHL24', 'PE4', 'triggerValue'};
 
   %% fMRI task
   % display a fixation cross during the fMRI run
@@ -144,6 +144,12 @@ function cfg = getParams(task,cfg)
 
   end
 
+  %% behavioral 
+  
+    % mapping of trigger values onto tasks
+    cfg.beh.trigTaskMapping = containers.Map({'RhythmFT','RhythmBlock'}, ...
+                                             {1, 2});
+  
   %% Load needed stimuli files
 
   % load target tones, missing stimuli, ...
