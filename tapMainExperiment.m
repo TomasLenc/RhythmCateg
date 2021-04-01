@@ -117,52 +117,52 @@ try
     collectAndSaveEvents(cfg, logFile, currSeq, iSequence, sequenceOnset, task);
     
     % ---- SAVE tapping as stim file ---- 
-    
-    % downsample tapping
-    [P,Q] = rat(cfg.audio.fsDs/cfg.audio.fs); 
-    tapDataDs = num2cell(resample(tapData(1,:), P, Q)); 
-    
-    % get stimulus envelope and downsample 
-    env = abs(hilbert(tapData(2,:))); 
-    soundDataDs = num2cell(resample(env, P, Q)); 
-            
-    stimFile = []; 
-    
-    % set columns for data
-    stimFile(1).extraColumns = {'tapForce', 'sound'};
-
-    stimFile(1).StartTime = 0; 
-    stimFile(1).SamplingFrequency = cfg.audio.fsDs; 
-
-    % init stim file
-    stimFile = saveEventsFile('init_stim', cfg, stimFile); 
-
-    % output directory (created automatically)
-    stimFile = saveEventsFile('open', cfg, stimFile); 
-    
-    % prepre data
-    [stimFile(1:length(tapDataDs),1).tapForce] = tapDataDs{:}; 
-    [stimFile(1:length(tapDataDs),1).sound] = soundDataDs{:}; 
-
-    % write
-    stimFile = saveEventsFile('save', cfg, stimFile);
-    
+    %% delete this part 
+%     % downsample tapping
+%     [P,Q] = rat(cfg.audio.fsDs/cfg.audio.fs); 
+%     tapDataDs = num2cell(resample(tapData(1,:), P, Q)); 
+%     
+%     % get stimulus envelope and downsample 
+%     env = abs(hilbert(tapData(2,:))); 
+%     soundDataDs = num2cell(resample(env, P, Q)); 
+%             
+%     stimFile = []; 
+%     
+%     % set columns for data
+%     stimFile(1).extraColumns = {'tapForce', 'sound'};
+% 
+%     stimFile(1).StartTime = 0; 
+%     stimFile(1).SamplingFrequency = cfg.audio.fsDs; 
+% 
+%     % init stim file
+%     stimFile = saveEventsFile('init_stim', cfg, stimFile); 
+% 
+%     % output directory (created automatically)
+%     stimFile = saveEventsFile('open', cfg, stimFile); 
+%     
+%     % prepre data
+%     [stimFile(1:length(tapDataDs),1).tapForce] = tapDataDs{:}; 
+%     [stimFile(1:length(tapDataDs),1).sound] = soundDataDs{:}; 
+% 
+%     % write
+%     stimFile = saveEventsFile('save', cfg, stimFile);
+    %% 
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', cfg, logFile);
   
-    % ===========================================
-    % audiofile
-    % ===========================================
-    fileNameTap = [cfg.fileName.base, ...
-                   cfg.fileName.suffix.run, ...
-                   '_recording-tapping_physio', ...
-                   '_date-',  cfg.fileName.date, ...
-                   '.wav']; 
-
-    % save tapping with original sampling rate          
-    audiowrite(fullfile(cfg.dir.outputSubject, fileNameTap),...
-               tapData', ...
-               cfg.audio.fs); % 'BitsPerSample' -> only 8 bit resolution to save faster...
+%     % ===========================================
+%     % audiofile - 
+%     % ===========================================
+%     fileNameTap = [cfg.fileName.base, ...
+%                    cfg.fileName.suffix.run, ...
+%                    '_recording-tapping_physio', ...
+%                    '_date-',  cfg.fileName.date, ...
+%                    '.wav']; 
+% 
+%     % save tapping with original sampling rate          
+%     audiowrite(fullfile(cfg.dir.outputSubject, fileNameTap),...
+%                tapData', ...
+%                cfg.audio.fs); % 'BitsPerSample' -> only 8 bit resolution to save faster...
 
     %% 
     % show pause screen in between sequences
