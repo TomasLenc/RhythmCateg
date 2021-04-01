@@ -58,13 +58,13 @@ function [seq] = makeStimTrain(cfg, currPatterni, cueDBleveli, currWini, soundId
     %% this is a sequence made of Grahn2007 patterns
   elseif strcmpi(class(cfg.patterns{currPatterni}), 'char')
 
-    nSamplesPat     = round(cfg.grahn.interPatternInterval * cfg.fs);
-    seq.dur         = cfg.grahn.interPatternInterval * cfg.nCyclesPerWin(currPatterni);
+    nSamplesPat     = round(cfg.pattern.interPatternInterval * cfg.fs);
+    seq.dur         = cfg.pattern.interPatternInterval * cfg.nCyclesPerWin(currPatterni);
     seq.nSamples    = round(seq.dur * cfg.fs);
     seq.nCycles     = cfg.nCyclesPerWin(currPatterni);
     seq.idxEnd      = 0; % dummy, only used for audiotracks
     seq.patternIDs  = cell(1, seq.nCycles);
-    seq.pattern     = nan(1, seq.nCycles * cfg.grahn.nGridPoints);
+    seq.pattern     = nan(1, seq.nCycles * cfg.pattern.nGridPoints);
     seq.cue         = repmat([1, zeros(1, cfg.cuePeriodGrid(currPatterni) - 1)], ...
                              1, floor(length(seq.pattern) / cfg.cuePeriodGrid(currPatterni)));
 
@@ -73,14 +73,14 @@ function [seq] = makeStimTrain(cfg, currPatterni, cueDBleveli, currWini, soundId
     % get the F0 for each pattern (without direct repetition)
     F0s2use             = zeros(1, cfg.nCyclesPerWin(currPatterni));
     amps2use            = zeros(1, cfg.nCyclesPerWin(currPatterni));
-    availF0idx          = 1:length(cfg.grahn.F0s);
+    availF0idx          = 1:length(cfg.pattern.F0s);
     currF0idx           = Inf;
     for pati = 1:cfg.nCyclesPerWin(currPatterni)
-      availF0idx      = 1:length(cfg.grahn.F0s);
+      availF0idx      = 1:length(cfg.pattern.F0s);
       availF0idx(availF0idx == currF0idx) = [];
       currF0idx       = randsample(availF0idx, 1);
-      F0s2use(pati)   = cfg.grahn.F0s(currF0idx);
-      amps2use(pati)  = cfg.grahn.F0sAmps(currF0idx);
+      F0s2use(pati)   = cfg.pattern.F0s(currF0idx);
+      amps2use(pati)  = cfg.pattern.F0sAmps(currF0idx);
 
     end
     seq.F0s = F0s2use;
@@ -88,47 +88,46 @@ function [seq] = makeStimTrain(cfg, currPatterni, cueDBleveli, currWini, soundId
     % get pattern IDs (without direct repetition)
     if ~isempty(regexpi(cfg.patterns{currPatterni}, 'simple'))
 
-      availPatIdx = 1:length(cfg.grahn.patternSimple);
+      availPatIdx = 1:length(cfg.pattern.patternSimple);
       currPatIdx = Inf;
       idx = 0;
       for pati = 1:cfg.nCyclesPerWin(currPatterni)
         % indices of patterns are available to choose from (to avoid
         % succesive repetition)
-        availPatIdx = 1:length(cfg.grahn.patternSimple);
+        availPatIdx = 1:length(cfg.pattern.patternSimple);
         availPatIdx(availPatIdx == currPatIdx) = [];
         % choose random pattern
         currPatIdx = randsample(availPatIdx, 1);
-        currPattern = cfg.grahn.patternSimple(currPatIdx).pattern;
-        seq.patternIDs{pati} = cfg.grahn.patternSimple(currPatIdx).ID;
-        seq.pattern((pati - 1) * cfg.grahn.nGridPoints + 1:pati * cfg.grahn.nGridPoints) = currPattern;
+        currPattern = cfg.pattern.patternSimple(currPatIdx).pattern;
+        seq.patternIDs{pati} = cfg.pattern.patternSimple(currPatIdx).ID;
+        seq.pattern((pati - 1) * cfg.pattern.nGridPoints + 1:pati * cfg.pattern.nGridPoints) = currPattern;
         % generate audio
         seqPattern(idx + 1:idx + nSamplesPat) = amps2use(pati) * makeStimMainExp(currPattern, ...
                                                                                  cfg, ...
-                                                                                 cfg.pattern.gridIOIs, ...
+                                                                                 cfg.pattern.gridIOI, ...
                                                                                  F0s2use(pati));
         % update audio index
         idx = idx + nSamplesPat;
       end
 
     elseif ~isempty(regexpi(cfg.patterns{currPatterni}, 'complex'))
-
-      availPatIdx = 1:length(cfg.grahn.patternComplex);
+      availPatIdx = 1:length(cfg.pattern.patternComplex);
       currPatIdx = Inf;
       idx = 0;
       for pati = 1:cfg.nCyclesPerWin(currPatterni)
         % indices of patterns are available to choose from (to avoid
         % succesive repetition)
-        availPatIdx = 1:length(cfg.grahn.patternComplex);
+        availPatIdx = 1:length(cfg.pattern.patternComplex);
         availPatIdx(availPatIdx == currPatIdx) = [];
         % choose random pattern
         currPatIdx = randsample(availPatIdx, 1);
-        currPattern = cfg.grahn.patternComplex(currPatIdx).pattern;
-        seq.patternIDs{pati} = cfg.grahn.patternComplex(currPatIdx).ID;
-        seq.pattern((pati - 1) * cfg.grahn.nGridPoints + 1:pati * cfg.grahn.nGridPoints) = currPattern;
+        currPattern = cfg.pattern.patternComplex(currPatIdx).pattern;
+        seq.patternIDs{pati} = cfg.pattern.patternComplex(currPatIdx).ID;
+        seq.pattern((pati - 1) * cfg.pattern.nGridPoints + 1:pati * cfg.pattern.nGridPoints) = currPattern;
         % generate audio
         seqPattern(idx + 1:idx + nSamplesPat) = amps2use(pati) * makeStimMainExp(currPattern, ...
                                                                                  cfg, ...
-                                                                                 cfg.pattern.gridIOIs, ...
+                                                                                 cfg.pattern.gridIOI, ...
                                                                                  F0s2use(pati));
         % update audio index
         idx = idx + nSamplesPat;

@@ -207,59 +207,59 @@ function cfg = getTrainingParameters(cfg)
 
   %% Grahn(2007) patterns
 
-  cfg.grahn.fs = cfg.fs;
+  cfg.pattern.fs = cfg.fs;
 
   % read from txt files
   grahnPatSimple = loadIOIRatiosFromTxt(fullfile('stimuli', 'Grahn2007_simple.txt'));
   grahnPatComplex = loadIOIRatiosFromTxt(fullfile('stimuli', 'Grahn2007_complex.txt'));
 
   % get different metrics of the patterns
-  cfg.grahn.patternSimple = getPatternInfo(grahnPatSimple, 'simple', cfg);
-  cfg.grahn.patternComplex = getPatternInfo(grahnPatComplex, 'complex', cfg);
+  cfg.pattern.patternSimple = getPatternInfo(grahnPatSimple, 'simple', cfg);
+  cfg.pattern.patternComplex = getPatternInfo(grahnPatComplex, 'complex', cfg);
 
   % the grid interval can vary across steps or segments (gridIOI selected
   % randomly from a set of possible values for each new step or segment)
-  cfg.grahn.gridIOI = 0.190;
+  cfg.pattern.gridIOI = 0.190;
 
   % Define envelope shape of the individual sound event.
   % All parameters are defined in seconds.
 
   % total sound duration _/```\_
-  cfg.grahn.soundDur             = 0.190; % s
+  cfg.pattern.eventDur             = 0.190; % s
   % onset ramp duration  _/
-  cfg.grahn.eventRampon          = 0.010; % s
+  cfg.pattern.eventRampon          = 0.010; % s
   % offset ramp duration       \_
-  cfg.grahn.eventRampoff         = 0.020; % s
+  cfg.pattern.eventRampoff         = 0.020; % s
 
   % Make sure the total ramp durations are not longer than tone duration.
-  if (cfg.grahn.eventRampon + cfg.grahn.eventRampoff) > cfg.grahn.soundDur
+  if (cfg.pattern.eventRampon + cfg.pattern.eventRampoff) > cfg.pattern.eventDur
     error(sprintf('The summed duration of onset+offset ramps (%g ms) is longer than requensted tone duration (%g ms).', ...
-                  (cfg.grahn.eventRampon + cfg.grahn.eventRampoff) * 1e3, ...
-                  cfg.grahn.soundDur * 1e3));
+                  (cfg.pattern.eventRampon + cfg.pattern.eventRampoff) * 1e3, ...
+                  cfg.pattern.eventDur * 1e3));
   end
   % Make sure the tone duration is not longer than smallest gridIOI.
-  if cfg.grahn.soundDur >  cfg.grahn.gridIOI
+  if cfg.pattern.eventDur >  cfg.pattern.gridIOI
     error(sprintf('Requested tone duration (%g ms) is longer than shortest gridIOI (%g ms).', ...
-                  cfg.grahn.soundDur * 1e3, ...
-                  cfg.grahn.gridIOI * 1e3));
+                  cfg.pattern.eventDur * 1e3, ...
+                  cfg.pattern.gridIOI * 1e3));
   end
 
   % construct pattern (smallest item in sequence)
-  cfg.grahn.nGridPoints = 12; % length(pat_complex(1).pattern)
+  cfg.pattern.nGridPoints = 12; % length(pat_complex(1).pattern)
 
-  cfg.grahn.interPatternInterval = cfg.grahn.nGridPoints * cfg.grahn.gridIOI;
+  cfg.pattern.interPatternInterval = cfg.pattern.nGridPoints * cfg.pattern.gridIOI;
 
   % construct pitch features of the stimulus
   % the pitch (F0) of the tones making up the patterns can vary
   % (it can be selected randomly from a set of possible values)
-  cfg.grahn.minF0   = 350; % minimum possible F0
-  cfg.grahn.maxF0   = 900; % maximum possible F0
-  cfg.grahn.nF0       = 5; % number of unique F0-values between the limits
-  cfg.grahn.F0s       = logspace(log10(cfg.grahn.minF0), log10(cfg.grahn.maxF0), cfg.grahn.nF0);
+  cfg.pattern.minF0   = 350; % minimum possible F0
+  cfg.pattern.maxF0   = 900; % maximum possible F0
+  cfg.pattern.nF0       = 5; % number of unique F0-values between the limits
+  cfg.pattern.F0s       = logspace(log10(cfg.pattern.minF0), log10(cfg.pattern.maxF0), cfg.pattern.nF0);
 
   % use the requested gain of each tone to adjust the base amplitude
-  cfg.grahn.F0sAmpGain = equalizePureTones(cfg.grahn.F0s, [], []);
-  cfg.grahn.F0sAmps = 1 / sqrt(2) * maxAllowedRms * cfg.grahn.F0sAmpGain;
+  cfg.pattern.F0sAmpGain = equalizePureTones(cfg.pattern.F0s, [], []);
+  cfg.pattern.F0sAmps = 1 / sqrt(2) * maxAllowedRms * cfg.pattern.F0sAmpGain;
 
   %% generate example stimulus/sequence for only volume setting
 
