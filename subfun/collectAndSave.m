@@ -14,6 +14,8 @@ function responseEvents = collectAndSave(cfg, logFile, experimentStart)
         responseEvents(1).extraColumns = logFile.extraColumns;
         responseEvents(1).target = sum(target);
         
+        responseEvents(1).isStim = logFile.isStim;
+        
         saveEventsFile('save', cfg, responseEvents);
 
     end

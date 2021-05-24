@@ -6,6 +6,9 @@ experimentStart = cfg.experimentStart;
 currentSequence(1).fileID = logFile(1).fileID;
 currentSequence(1).extraColumns = logFile(1).extraColumns;
 
+% assing that this is an _event file instead of _stim file
+currentSequence(1).isStim = logFile.isStim;
+
 % adding columns in currSeq for BIDS format
 for iPattern = 1:numel(currentSequence)
     
