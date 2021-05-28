@@ -1,4 +1,4 @@
-function [s,env] = makeStimMainExp(pattern, cfg, currGridIOI, currF0,varargin)
+function [s,env] = makeStimMainExp(pattern, patternIOIs, cfg, currGridIOI, currF0, varargin)
 % this function creates pattern cycles according to the grid that was
 % provided
 % if nCycles = 1, it will create only 1 time repeated pattern
@@ -24,12 +24,20 @@ else
     currAmp = varargin{1};
 end
 
+if strcmp(cfg.testingDevice,'mri')
+    %use rms ratio for target
+    currAmp = cfg.isTask.rmsRatio;
+end
+
 if isfield(cfg.pattern,'taskIdxMatrix')
     isTask = cfg.isTask.Idx;
-    
 else
     isTask =[];
 end
+
+% get the time of each tone event relative to the start of the pattern 
+soundOnsetTimes = cumsum([0, patternIOIs]); 
+
 %% make envelope for the individual sound event
 
 % number of samples for the onset ramp (proportion of gridIOI)
@@ -45,127 +53,86 @@ envEvent = ones(1, round(cfg.pattern.eventDur * cfg.fs));
 envEvent(1:ramponSamples) = envEvent(1:ramponSamples) .* linspace(0,1,ramponSamples);
 envEvent(end-rampoffSamples+1:end) = envEvent(end-rampoffSamples+1:end) .* linspace(1,0,rampoffSamples);
 
-%[~, envEvent] = makeEvent(cfg,currF0);
+%% make time vector for individual sound event 
 
-%% synthesize whole pattern
-
-
-% if there is no field in the cfg structure specifying requested number of
-% cycles, set it to 1
-% how many times the pattern will be repeated/cycle through
-if isfield(cfg,'nCyclesPerPattern')
-    nCycles = cfg.pattern.nCyclesPerPattern;
-else
-    nCycles = 1;
-end
-
-% construct time vector
-t = [0 : round(nCycles * length(pattern) * currGridIOI * cfg.fs)-1]/cfg.fs;
-
-% construct envelope for the whole pattern
-env = zeros(1,length(t));
-smallEnv = cell(1,length(pattern));
-smallT = cell(1,length(pattern));
-c=0;
-s = [];
-
-for cyclei=1:nCycles
-    for i=1:length(pattern)
-        
-        %get the idx for inserting events
-        idx = round(c*currGridIOI*cfg.fs);
-        
-        %insert sound or no-sound event
-        env(idx+1:idx+length(envEvent)) = pattern(i) * envEvent;
-        
-        %store each event into a cell array
-        smallEnv{i} = env(idx+1:idx+length(envEvent));
-        smallT{i} = t(idx+1:idx+length(envEvent));
-        
-        c=c+1;
-    end
-end
-
+tEvent = [0:length(envEvent)-1]/cfg.fs; 
 
 %% calculate the rms for normalisation
-% events idx in the pattern
-idxTask = find(pattern);
 
-%% create carrier according to isTask/testingDevice
+% generate task sound
 if isTask
-
-    % display(targetSoundIdx);
+    
+    % indices of sound events in the pattern
+    idxTargets = find(pattern);
+    nSoundsEvents = length(idxTargets); 
 
     % find first N non-zero element
     % number of targets (numEvent) in a pattern is defined in getParam.m
-    if cfg.isTask.numEvent < length(idxTask)
-        % take the second tone in pattern as target
-        idxTask = idxTask(2:1+cfg.isTask.numEvent);
+    if cfg.isTask.numEvent < nSoundsEvents
+        % the second tone (and onwards) in the pattern will be targets
+        idxTargets = idxTargets([2:1+cfg.isTask.numEvent]); 
     end
     
     % check the current F0 & find the corresponding cfg.targetSound
     if length(cfg.isTask.F0Idx) == 1
         targetSoundIdx = cfg.isTask.F0Idx;  
     else
-        targetSoundIdx = cfg.isTask.F0Idx(idxTask);
+        targetSoundIdx = cfg.isTask.F0Idx(idxTargets);
     end
     
-%     disp(targetSoundIdx);
-    currTargetS = cfg.isTask.targetSounds{targetSoundIdx}; %
+    currTargetS = cfg.isTask.targetSounds{targetSoundIdx}; 
 
 end
 
-if strcmpi(cfg.testingDevice,'mri')
-    
-    %use rms ratio for target
-    currAmp = cfg.isTask.rmsRatio;
-    
-    for iEvent = 1:length(pattern)
-        
-        % find the targeted env & time
-        currEnv = smallEnv{iEvent};
-        currTime = smallT{iEvent};
-        
-        
-        % insert piano key when there's target
-        if isTask && ismember(iEvent,idxTask) % target - piano key
-            
-            % apply envelop to the target
-            currS = currTargetS.*currEnv;
+%% synthesize whole pattern
 
-        % no target = sine wave
-        else 
-            
-            if length(currF0)>1
-                if pattern(iEvent)
-                    currS = sin(2*pi*currF0(iEvent)*currTime);
-                    currS = currS.* currEnv;
-                    % apply the amplitude
-                    currS = currS.* currAmp;
-                else
-                    currS = sin(2*pi*currF0(1)*currTime);
-                    currS = currS.* currEnv;
-                    % apply the amplitude
-                    currS = currS.* currAmp;
-                end
-            else
-                currS = sin(2*pi*currF0*currTime);
-                currS = currS.* currEnv;
-                % apply the amplitude
-                currS = currS.* currAmp;
-            end
+% construct time vector
+t = [0 : (soundOnsetTimes(end)+currGridIOI) * cfg.fs] / cfg.fs; 
+
+% construct envelope for the whole pattern
+env = zeros(1,length(t));
+s = zeros(1,length(t));
+
+for iSound=1:length(soundOnsetTimes)
+
+    %get the idx for inserting events
+    idx = round(soundOnsetTimes(iSound)*cfg.fs);
+
+    %insert sound event envelope
+    env(idx+1:idx+length(envEvent)) = envEvent;
+    
+    % insert piano key when there's target
+    if isTask && ismember(iSound,targetSoundIdx) % target - piano key
+        % apply envelop to the target
+        soundEvent = currTargetS.*envEvent;
+
+    % no target = sine wave
+    else 
+        if length(currF0)>1
+            F0 = currF0(iSound); 
+        else
+            F0 = currF0; 
         end
-        
-        %assign it to big array
-        s = [s currS];
+        soundEvent = sin(2*pi*F0*tEvent);
+        soundEvent = soundEvent.* envEvent;
+        % apply the amplitude
+        soundEvent = soundEvent.*currAmp;
     end
+    
+    %insert sound event
+    s(idx+1:idx+length(soundEvent)) = soundEvent;
+    
 end
 
-end
-
-% % to visualise 1 pattern
- %figure; plot(t,s);
+    
+% to visualise 1 pattern
+%  figure; plot(t,s);
 % ylim([-1.5,1.5])
+
+
+
+end
+
 
 
 
