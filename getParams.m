@@ -39,9 +39,9 @@ cfg.dir.output = fullfile(...
 
 %% Debug mode settings
 cfg.debug.do        = false ;  
-cfg.debug.transpWin = false ;     % To test the script with trasparent full size screen
+cfg.debug.transpWin = true ;     % To test the script with trasparent full size screen
 cfg.debug.smallWin  = false;
-cfg.verbose         = true;        % add here and there some explanations with if verbose is ON. 
+cfg.verbose         = 1;        % add here and there some explanations with if verbose is ON. [0 1 2 ]
 
     
 %% MRI settings
