@@ -117,7 +117,10 @@ for stepi=1:cfg.pattern.nStepsPerSequence
         segmentOnset  = currTimePoint;
         
         % find which patterns are part of the current segment 
-        patIdx = [(segmi-1)*cfg.pattern.nPatternPerSegment+1 : segmi*cfg.pattern.nPatternPerSegment]; 
+        nPatBeforeThis = (stepi-1)*cfg.pattern.nSegmPerStep*cfg.pattern.nPatternPerSegment ...
+                         + (segmi-1)*cfg.pattern.nPatternPerSegment; 
+                     
+        patIdx = [nPatBeforeThis+1 : nPatBeforeThis+cfg.pattern.nPatternPerSegment]; 
         
         % loop over patterns in 1 segment                
         for pati=1:cfg.pattern.nPatternPerSegment
