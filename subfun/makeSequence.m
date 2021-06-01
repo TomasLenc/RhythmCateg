@@ -1,4 +1,4 @@
-% function seq = makeSequence(cfg,seqi,varargin)
+function seq = makeSequence(cfg,seqi,varargin)
 % This function constructs a stimulus sequence.
 % by using makeStimMainExp.m script
 
@@ -285,6 +285,7 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             % First, check for fmri task exists
             if isfield(cfg.pattern,'taskIdxMatrix')
                 cfg.isTask.Idx = cfg.pattern.taskIdxMatrix(seqi,stepi,segmi,pati);
+                
                 % the current F0s index is used for finding the
                 % taskSound
                 cfg.isTask.F0Idx = currF0idx;
@@ -300,6 +301,7 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             seq(cPat,1).segmentOnset = segmentOnset;
             seq(cPat,1).stepNum     = stepi;
             seq(cPat,1).stepOnset   = stepOnset;
+            seq(cPat,1).taskF0idx   = currF0idx;
             seq(cPat,1).isTask      = cfg.isTask.Idx;
             
             seq(cPat,1).pattern     = currPattern; 
@@ -422,8 +424,10 @@ for stepi=1:cfg.pattern.nStepsPerSequence
                                                currPatIOIs(1:end-1), ...
                                                cfg, ...
                                                seq(pati,1).gridIOI, ...
-                                               seq(pati,1).F0,...
-                                               seq(pati,1).patternAmp); 
+                                               seq(pati,1).F0,...                                      
+                                               seq(pati,1).taskF0idx, ...
+                                               seq(pati,1).isTask, ... 
+                                               seq(pati,1).patternAmp);
 
             % update pattern onset time wrt whole sequence                                
             seq(cPat,1).onset = currTimePoint+seq(pati,1).soundOnsetTimesWrtSegm(1);
