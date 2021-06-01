@@ -70,7 +70,7 @@ cfg.pacedByTriggers.do = false;
 %% general configuration
 %for BIDS format: 
 cfg.task.name = task;                % should be calling behav or fmri
-cfg.subject.askGrpSess = [1 0]; % it won't ask you about group or session
+cfg.subject.askGrpSess = [0 0]; % it won't ask you about group or session
     
 % set and load all the subject input to run the experiment
 cfg = userInputs(cfg);
@@ -107,7 +107,7 @@ if strcmpi(cfg.testingDevice,'mri')
     %Fixation Cross
     % Used Pixels here since it really small and can be adjusted during the experiment
     cfg.fixation.type                   = 'bestFixation'; %
-    cfg.fixation.width                  = .2;   % Set the length of the lines (in Pixels) of the fixation cross
+    cfg.fixation.width                  = .1;   % Set the length of the lines (in Pixels) of the fixation cross
     cfg.fixation.lineWidthPix           = 5;    % Set the line width (in Pixels) for our fixation cross
     cfg.fixation.xDisplacement          = 0;    % Manual displacement of the fixation cross
     cfg.fixation.yDisplacement          = 0;    % Manual displacement of the fixation cross
@@ -211,19 +211,6 @@ cfg.keyboard.escapeKey = 'ESCAPE';
 cfg.keyboard.responseKey = {'d', 'a', 'c', 'b'};
 cfg.keyboard.keyboard = [];
 cfg.keyboard.responseBox = [];
-
-
-% %behavioral exp keys to check
-% cfg.keywait         = KbName({'RETURN'}); % press enter to start bloc
-% cfg.keyquit         = KbName('ESCAPE'); % press ESCAPE at response time to quit
-% cfg.keyToggleInstr  = KbName({'I'}); % press I to show/remove general instructions from the screen
-% cfg.keytap          = KbName('SPACE');
-% cfg.keyVolUp        = KbName('UpArrow');
-% cfg.keyVolDown      = KbName('DownArrow');
-% cfg.keyAudioPlay    = KbName('p');
-% cfg.keyAudioStop    = KbName('s');
-% cfg.keyInstrBack    = KbName('b');
-% cfg.keyInstrNext    = KbName('n');
 
 
 if strcmpi(cfg.testingDevice, 'mri')
