@@ -1,4 +1,4 @@
-function [s,env] = makeStimMainExp(pattern, patternIOIs, cfg, currGridIOI, currF0, varargin)
+function [s,env] = makeStimMainExp(pattern, patternIOIs, cfg, currGridIOI, currF0, taskF0idx, isTask, varargin)
 % this function creates pattern cycles according to the grid that was
 % provided
 % if nCycles = 1, it will create only 1 time repeated pattern
@@ -18,7 +18,7 @@ function [s,env] = makeStimMainExp(pattern, patternIOIs, cfg, currGridIOI, currF
 
 % I added as varargin in case you are using this function somewhere else
 % than the tapMainExperiment
-if nargin<5
+if nargin<8
     currAmp = 1;
 else
     currAmp = varargin{1};
@@ -29,11 +29,11 @@ if strcmp(cfg.testingDevice,'mri')
     currAmp = cfg.isTask.rmsRatio;
 end
 
-if isfield(cfg.pattern,'taskIdxMatrix')
-    isTask = cfg.isTask.Idx;
-else
-    isTask =[];
-end
+% if isfield(cfg.pattern,'taskIdxMatrix')
+%     isTask = cfg.isTask.Idx;
+% else
+%     isTask =[];
+% end
 
 % get the time of each tone event relative to the start of the pattern 
 soundOnsetTimes = cumsum([0, patternIOIs]); 
@@ -74,10 +74,10 @@ if isTask
     end
     
     % check the current F0 & find the corresponding cfg.targetSound
-    if length(cfg.isTask.F0Idx) == 1
-        targetSoundIdx = cfg.isTask.F0Idx;  
+    if length(taskF0idx) == 1
+        targetSoundIdx = taskF0idx;  
     else
-        targetSoundIdx = cfg.isTask.F0Idx(idxTargets);
+        targetSoundIdx = taskF0idx(idxTargets);
     end
     
     currTargetS = cfg.isTask.targetSounds{targetSoundIdx}; 
