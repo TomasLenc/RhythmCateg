@@ -29,11 +29,6 @@ if strcmp(cfg.testingDevice,'mri')
     currAmp = cfg.isTask.rmsRatio;
 end
 
-% if isfield(cfg.pattern,'taskIdxMatrix')
-%     isTask = cfg.isTask.Idx;
-% else
-%     isTask =[];
-% end
 
 % get the time of each tone event relative to the start of the pattern 
 soundOnsetTimes = cumsum([0, patternIOIs]); 

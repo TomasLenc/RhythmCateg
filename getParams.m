@@ -140,8 +140,6 @@ if strcmpi(cfg.testingDevice,'mri')
     'gridIOI', 'patternAmp', 'minPE4', 'rangePE4', 'minLHL24', ...
     'rangeLHL24', 'LHL24', 'PE4','keyName', 'pressed', 'target'};
 
-    % response columns
-   % cfg.responseExtraColumns = {'keyName', 'pressed', 'target'};
 
 end
 
@@ -200,10 +198,11 @@ end
 % then you can assign device number to the main keyboard or the response
 % box. 
 % otherwise it's set for PTB to assign. 
-[keyboardNumbers, keyboardNames] = GetKeyboardIndices;
 
-disp(keyboardNumbers);
-disp(keyboardNames);
+% [keyboardNumbers, keyboardNames] = GetKeyboardIndices;
+% 
+% disp(keyboardNumbers);
+% disp(keyboardNames);
 
 
 

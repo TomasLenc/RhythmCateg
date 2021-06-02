@@ -14,7 +14,7 @@ initEnv();
 
 % Define the task = 'RhythmFT', 'PitchFT', 'RhythmBlock', 'Nonmetric'
 % Get parameters by providing task name
-cfg = getParams('RhythmFT');
+cfg = getParams('PitchFT');
 
 
 
@@ -137,7 +137,6 @@ try
     %% save
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', cfg, logFile);
-  %  saveEventsFile('close', cfg, responseFile);
 
     % save the whole workspace
     matFile = fullfile(cfg.dir.output, ...
@@ -149,7 +148,6 @@ try
     end
 
     createJson(cfg, 'func');
-    %createJson(cfg, cfg);
     
     % clean the workspace
     cleanUp;
