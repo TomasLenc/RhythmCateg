@@ -29,7 +29,7 @@
 ioiScrambleRatio = 0.43; 
 
 % boool flag, do the nonmetric scambling 
-DO_NONMETRIC = 1; 
+DO_NONMETRIC = 0; 
 % ---------------------------------------
 
 if cfg.debug.do
@@ -98,9 +98,6 @@ currF0idx = 1;
 % currently chosen gridIOI index (indexing value in cfg.pattern.gridIOIs, initialize to 1)
 currGridIOIidx = 1; 
 
-% pattern counter (over the whole sequence)
-cPat = 1; 
-
 % current time point in the sequence as we go through the loops
 currTimePoint = 0; 
 
@@ -118,6 +115,12 @@ for stepi=1:cfg.pattern.nStepsPerSequence
         
         % take the  timestamp for logging the current segment time
         segmentOnset  = currTimePoint;
+        
+        % find which patterns are part of the current segment 
+        nPatBeforeThis = (stepi-1)*cfg.pattern.nSegmPerStep*cfg.pattern.nPatternPerSegment ...
+                         + (segmi-1)*cfg.pattern.nPatternPerSegment; 
+                     
+        patIdx = [nPatBeforeThis+1 : nPatBeforeThis+cfg.pattern.nPatternPerSegment]; 
         
         % loop over patterns in 1 segment                
         for pati=1:cfg.pattern.nPatternPerSegment
@@ -285,6 +288,7 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             % First, check for fmri task exists
             if isfield(cfg.pattern,'taskIdxMatrix')
                 cfg.isTask.Idx = cfg.pattern.taskIdxMatrix(seqi,stepi,segmi,pati);
+                
                 % the current F0s index is used for finding the
                 % taskSound
                 cfg.isTask.F0Idx = currF0idx;
@@ -292,33 +296,30 @@ for stepi=1:cfg.pattern.nStepsPerSequence
                 cfg.isTask.Idx = 0;
             end
             
-            seq(cPat,1).patternID   = currPatID;
-            seq(cPat,1).segmentCateg   = currCategLabel;
-            seq(cPat,1).segmentLabel   = currSegmentLabel;
-            seq(cPat,1).onset       = currTimePoint;
-            seq(cPat,1).segmentNum  = segmi;
-            seq(cPat,1).segmentOnset = segmentOnset;
-            seq(cPat,1).stepNum     = stepi;
-            seq(cPat,1).stepOnset   = stepOnset;
-            seq(cPat,1).isTask      = cfg.isTask.Idx;
+            seq(patIdx(pati),1).patternID   = currPatID;
+            seq(patIdx(pati),1).segmentCateg   = currCategLabel;
+            seq(patIdx(pati),1).segmentLabel   = currSegmentLabel;
+            seq(patIdx(pati),1).segmentNum  = segmi;
+            seq(patIdx(pati),1).segmentOnset = segmentOnset;
+            seq(patIdx(pati),1).stepNum     = stepi;
+            seq(patIdx(pati),1).stepOnset   = stepOnset;
+            seq(patIdx(pati),1).taskF0idx   = currF0idx;
+            seq(patIdx(pati),1).isTask      = cfg.isTask.Idx;
             
-            seq(cPat,1).pattern     = currPattern; 
-            seq(cPat,1).nSounds     = length(find(currPattern)); 
-            seq(cPat,1).F0          = currF0(1);
-            seq(cPat,1).gridIOI     = currGridIOI;
-            seq(cPat,1).patternAmp  = currAmp(1);
+            seq(patIdx(pati),1).pattern     = currPattern; 
+            seq(patIdx(pati),1).nSounds     = length(find(currPattern)); 
+            seq(patIdx(pati),1).F0          = currF0(1);
+            seq(patIdx(pati),1).gridIOI     = currGridIOI;
+            seq(patIdx(pati),1).patternAmp  = currAmp(1);
 
             % get pattern info e.g. PE and LHL
-            seq(cPat,1).PE4        = patterns2choose(currPatIdx).PE4;
-            seq(cPat,1).minPE4     = patterns2choose(currPatIdx).minPE4;
-            seq(cPat,1).rangePE4   = patterns2choose(currPatIdx).rangePE4;
-            seq(cPat,1).LHL24      = patterns2choose(currPatIdx).LHL24;
-            seq(cPat,1).minLHL24   = patterns2choose(currPatIdx).minLHL24;
-            seq(cPat,1).rangeLHL24 = patterns2choose(currPatIdx).rangeLHL24;
-            
-            % increase pattern counter
-            cPat = cPat+1; 
-            
+            seq(patIdx(pati),1).PE4        = patterns2choose(currPatIdx).PE4;
+            seq(patIdx(pati),1).minPE4     = patterns2choose(currPatIdx).minPE4;
+            seq(patIdx(pati),1).rangePE4   = patterns2choose(currPatIdx).rangePE4;
+            seq(patIdx(pati),1).LHL24      = patterns2choose(currPatIdx).LHL24;
+            seq(patIdx(pati),1).minLHL24   = patterns2choose(currPatIdx).minLHL24;
+            seq(patIdx(pati),1).rangeLHL24 = patterns2choose(currPatIdx).rangeLHL24;
+                        
         end % pattern loop 
         
         
@@ -327,9 +328,6 @@ for stepi=1:cfg.pattern.nStepsPerSequence
         % ----- get inter-onset interval representation for each pattern ---
         % ------------------------------------------------------------------
         
-        % find which patterns are part of the current segment 
-        patIdx = [(segmi-1)*cfg.pattern.nPatternPerSegment+1 : segmi*cfg.pattern.nPatternPerSegment]; 
-
         currSegmPatterns = [seq(patIdx).pattern]; 
         nSoundsPerPattern = [seq(patIdx).nSounds]; 
 
@@ -384,26 +382,26 @@ for stepi=1:cfg.pattern.nStepsPerSequence
 
         segmAudio = zeros(1, round(cfg.pattern.interSegmInterval*cfg.fs)); 
 
-        for pati=patIdx
+        for pati=1:length(patIdx)
 
             % get sound event IOIs and convert to seconds 
-            if pati<patIdx(end)
-                currPatIOIs = currSegmIOIs(c+1:c+seq(pati,1).nSounds) * seq(pati,1).gridIOI; 
+            if pati<length(patIdx)
+                currPatIOIs = currSegmIOIs(c+1:c+seq(patIdx(pati),1).nSounds) * seq(patIdx(pati),1).gridIOI; 
             else
-                currPatIOIs = currSegmIOIs(c+1:c+seq(pati,1).nSounds-1) * seq(pati,1).gridIOI;        
+                currPatIOIs = currSegmIOIs(c+1:c+seq(patIdx(pati),1).nSounds-1) * seq(patIdx(pati),1).gridIOI;        
             end
 
             % from IOIs, get onset time of each sound event wrt current segment onset 
             if isfield(seq,'IOIs')
-                patternOnsetTimeWrtSegm = sum( [seq(patIdx(patIdx<pati),1).IOIs] ); 
+                patternOnsetTimeWrtSegm = sum( [seq(patIdx(patIdx<patIdx(pati)),1).IOIs] ); 
             else
                 patternOnsetTimeWrtSegm = 0; 
             end
-            seq(pati,1).soundOnsetTimesWrtSegm = patternOnsetTimeWrtSegm + ...
+            seq(patIdx(pati),1).soundOnsetTimesWrtSegm = patternOnsetTimeWrtSegm + ...
                                                  cumsum([0, currPatIOIs(1:end-1)]);    
 
             % if this is the last pattern in the segment, we need to add one IOI for completeness                               
-            if pati==patIdx(end)
+            if pati==length(patIdx)
                 % time from last sound event in the current segment to next segment onset
                 ioiToNextSegm = cfg.pattern.interSegmInterval - ...
                                 seq(patIdx(end),1).soundOnsetTimesWrtSegm(end); 
@@ -412,24 +410,26 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             end
 
             % assign the resutlting IOIs for this pattern 
-            seq(pati,1).IOIs = currPatIOIs; 
+            seq(patIdx(pati),1).IOIs = currPatIOIs; 
 
             % update sound-event counter for this segment 
-            c = c + seq(pati,1).nSounds; 
+            c = c + seq(patIdx(pati),1).nSounds; 
 
             % make audio for the pattern 
-            [patternAudio,~] = makeStimMainExp(seq(pati,1).pattern, ...
+            [patternAudio,~] = makeStimMainExp(seq(patIdx(pati),1).pattern, ...
                                                currPatIOIs(1:end-1), ...
                                                cfg, ...
-                                               seq(pati,1).gridIOI, ...
-                                               seq(pati,1).F0,...
-                                               seq(pati,1).patternAmp); 
+                                               seq(patIdx(pati),1).gridIOI, ...
+                                               seq(patIdx(pati),1).F0,...                                      
+                                               seq(patIdx(pati),1).taskF0idx, ...
+                                               seq(patIdx(pati),1).isTask, ... 
+                                               seq(patIdx(pati),1).patternAmp);
 
             % update pattern onset time wrt whole sequence                                
-            seq(cPat,1).onset = currTimePoint+seq(pati,1).soundOnsetTimesWrtSegm(1);
+            seq(patIdx(pati),1).onset = currTimePoint+seq(patIdx(pati),1).soundOnsetTimesWrtSegm(1);
 
             % get current audio index in the sequence, and append the audio
-            currAudioIdx = round( seq(pati,1).soundOnsetTimesWrtSegm(1) * cfg.fs); 
+            currAudioIdx = round( seq(patIdx(pati),1).soundOnsetTimesWrtSegm(1) * cfg.fs); 
 
             % assign pattern audio to segment audio
             segmAudio(currAudioIdx+1:currAudioIdx+length(patternAudio)) = patternAudio; 

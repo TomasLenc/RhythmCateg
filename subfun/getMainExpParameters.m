@@ -180,35 +180,38 @@ cfg.pattern.labelSegmentB = 'B';
 %%%%%%%%%%%%
 % ! important, the order of arguments matters ! -> getAllSeqDesign(categA, categB, ...)
 %%%%%%%%%%%%
-[cfg.pattern.seqDesignFullExp,~] = getAllSeqDesign(cfg.pattern.patternA, ...
-    cfg.pattern.patternB,cfg);
+% [cfg.pattern.seqDesignFullExp,~] = getAllSeqDesign(cfg.pattern.patternA, ...
+%     cfg.pattern.patternB,cfg);
+
 % generate example audio for volume setting
 % added F0s-amplitude because the relative dB set in volume adjustment in
 % PychPortAudio will be used in the mainExp
 % if there no if-loop here, during mri exp, it goes to makeStimMainExp and
 % crashes.! 
-if strcmp(cfg.testingDevice,'pc')
-cfg.volumeSettingSound = repmat(makeStimMainExp(ones(1,16), cfg,...
-    cfg.pattern.gridIOIs(end), cfg.pattern.F0s(end), cfg.pattern.F0sAmps(end) ), 2,1);
-                                makeStimMainExp(pattern, cfg, currGridIOI, currF0,varargin)
-end
+% if strcmp(cfg.testingDevice,'pc')
+% cfg.volumeSettingSound = repmat(makeStimMainExp(ones(1,16), cfg,...
+%     cfg.pattern.gridIOIs(end), cfg.pattern.F0s(end), cfg.pattern.F0sAmps(end) ), 2,1);
+%                                 makeStimMainExp(pattern, cfg, currGridIOI, currF0,varargin)
+% end
 
-if strcmp(cfg.testingDevice,'mri') 
-    % create randomized sequence for 9 runs when run =1
-    % overwrites cfg.pattern.seqDesignFullExp
-    cfg = makefMRISeqDesign(cfg);
-    % overwrite the base amp
-    cfg = normaliseEvent(cfg);
-    cfg.pattern.F0sAmps = cfg.baseAmp * cfg.pattern.F0sAmpGain * ...
-        cfg.isTask.rmsRatio; 
-    % provide an error if it amp above 1 !
-    % % %
-    
-    % % %
-    % can I normalise the target sound to make the max [-1 1]
-    % to increase the amplitude of whole sounds?
-    % % %
-end
+
+% create randomized sequence for 9 runs when run =1
+% overwrites cfg.pattern.seqDesignFullExp
+cfg = makefMRISeqDesign(cfg);
+
+% overwrite the base amp
+cfg = normaliseEvent(cfg);
+cfg.pattern.F0sAmps = cfg.baseAmp * cfg.pattern.F0sAmpGain * ...
+    cfg.isTask.rmsRatio;
+% % % 
+% provide an error if it amp above 1 !
+% % %
+
+% % %
+% can I normalise the target sound to make the max [-1 1]
+% to increase the amplitude of whole sounds?
+% % %
+
 
 
 
