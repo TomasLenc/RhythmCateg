@@ -12,9 +12,9 @@ end
 % make sure we got access to all the required functions and inputs
 initEnv();
 
-% Define the task = 'RhythmFT', 'PitchFT', 'RhythmBlock', 'Nonmetric'
+% Define the task = 'RhythmFT', 'RhythmBlock', 'Nonmetric'
 % Get parameters by providing task name
-cfg = getParams('PitchFT');
+cfg = getParams('Nonmetric');
 
 
 
