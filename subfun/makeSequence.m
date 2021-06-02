@@ -359,7 +359,8 @@ for stepi=1:cfg.pattern.nStepsPerSequence
                     % if odd, keep one intact and do the same 
                     idxToKeep = randsample(idxIOIClass,1); 
                     idxIOIClass(idxIOIClass==idxToKeep) = []; 
-                    idxToLenghten = randsample(idxIOIClass, length(idxIOIClass)/2); 
+                    % use round, incase length == 1
+                    idxToLenghten = randsample(idxIOIClass, round(length(idxIOIClass)/2)); 
                     idxToShorten = setdiff(idxIOIClass,idxToLenghten); 
                 end
                 currSegmIOIsNonmetric(idxToLenghten) = currSegmIOIs(idxToLenghten) * 1+ioiScrambleRatio; 
