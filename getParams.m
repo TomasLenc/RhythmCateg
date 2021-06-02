@@ -172,6 +172,10 @@ elseif strcmp(cfg.task.name,'PitchFT')
     
     cfg = getPitchParameters(cfg);
     
+elseif strcmp(cfg.task.name,'Nonmetric')
+    
+    cfg = getNonmetricParameters(cfg);
+    
 end
 
 
@@ -198,8 +202,8 @@ end
 % otherwise it's set for PTB to assign. 
 [keyboardNumbers, keyboardNames] = GetKeyboardIndices;
 
-% disp(keyboardNumbers);
-% disp(keyboardNames);
+disp(keyboardNumbers);
+disp(keyboardNames);
 
 
 
@@ -281,11 +285,11 @@ cfg.color.background = cfg.color.grey;
 cfg.text.color = cfg.color.white;
 %cfg.color.foreground =  [127 127 127];
 
-% % Monitor parameters
-% if strcmpi(cfg.testingDevice, 'mri')
-%     cfg.screen.monitorWidth = 69.8;
-%     cfg.screen.monitorDistance = 170;
-% end
+% Monitor parameters
+if strcmpi(cfg.testingDevice, 'mri')
+    cfg.screen.monitorWidth = 69.8;
+    cfg.screen.monitorDistance = 170;
+end
 
 end
 

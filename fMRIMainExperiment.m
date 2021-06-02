@@ -1,6 +1,5 @@
 
 %%
-
 % Clear all the previous stuff
 if ~ismac
     close all;
@@ -13,7 +12,7 @@ end
 % make sure we got access to all the required functions and inputs
 initEnv();
 
-% Define the task = 'RhythmFT', 'PitchFT', 'RhythmBlock'
+% Define the task = 'RhythmFT', 'PitchFT', 'RhythmBlock', 'Nonmetric'
 % Get parameters by providing task name
 cfg = getParams('RhythmFT');
 
@@ -41,10 +40,6 @@ try
 
     % actual inititalization
     logFile = saveEventsFile('open', cfg, logFile);
-    
-    % create response file - used for counting button press
-%     responseFile.extraColumns = cfg.responseExtraColumns;
-%     responseFile  = saveEventsFile('init_stim', cfg, responseFile);
 
     
     % Show instructions for fMRI task & wait for space press

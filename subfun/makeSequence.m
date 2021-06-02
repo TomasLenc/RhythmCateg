@@ -1,10 +1,9 @@
-% function seq = makeSequence(cfg,seqi,varargin)
+function seq = makeSequence(cfg,seqi,varargin)
 % This function constructs a stimulus sequence.
 % by using makeStimMainExp.m script
 
 % it's also depending on getAllSeqDesign.m output with the given 
 % run number==seqi (fmri) or expParam.numSequences == seqi (behav)
-
 
 % ------
 % INPUT
@@ -20,17 +19,6 @@
 %
 %
 
-
-% ---------------------------------------
-% JUST FOR DEVELOPMENT 
-
-% ratio with which half of IOIs in each category (2, 3, 4 gridpoints)
-% is lenghtened/shortened (within each segment)
-ioiScrambleRatio = 0.43; 
-
-% boool flag, do the nonmetric scambling 
-DO_NONMETRIC = 0; 
-% ---------------------------------------
 
 if cfg.debug.do
     seqi = 1;
@@ -337,6 +325,14 @@ for stepi=1:cfg.pattern.nStepsPerSequence
         % find what different inter-onset intervals are in the sequence (1,2,3,4)
         IOIClasses = unique(currSegmIOIs); 
 
+        
+        % boool flag, do the nonmetric scambling 
+        DO_NONMETRIC = 0;
+        if cfg.pattern.doNonMetric
+                DO_NONMETRIC = 1;
+                ioiScrambleRatio = cfg.pattern.ioiScrambleRatio;
+        end
+                
         if DO_NONMETRIC
 
             % allocate new nonmetric IOI representation 
