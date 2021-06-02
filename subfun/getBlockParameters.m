@@ -180,23 +180,23 @@ cfg.pattern.labelSegmentB = 'B';
 cfg.pattern.seqDesignFullExp = getAllSeqDesign(cfg.pattern.patternA, ...
     cfg.pattern.patternB,cfg);
 
-if strcmp(cfg.testingDevice,'pc')
-cfg.volumeSettingSound = repmat(makeStimMainExp(ones(1,16), cfg,...
-    cfg.pattern.gridIOIs(end), cfg.pattern.F0s(end), cfg.pattern.F0sAmps(end) ), 2,1);
-                                makeStimMainExp(pattern, cfg, currGridIOI, currF0,varargin)
-end
+% if strcmp(cfg.testingDevice,'pc')
+% cfg.volumeSettingSound = repmat(makeStimMainExp(ones(1,16), cfg,...
+%     cfg.pattern.gridIOIs(end), cfg.pattern.F0s(end), cfg.pattern.F0sAmps(end) ), 2,1);
+%                                 makeStimMainExp(pattern, cfg, currGridIOI, currF0,varargin)
+% end
 
-if strcmp(cfg.testingDevice,'mri') 
-    % create randomized sequence for 9 runs when run =1
-    % overwrites cfg.pattern.seqDesignFullExp
-    cfg = makefMRISeqDesign(cfg);
-    
-    % overwrite the base amp
-    cfg = normaliseEvent(cfg);
-    
-    cfg.pattern.F0sAmps = cfg.baseAmp * cfg.pattern.F0sAmpGain * ...
-        cfg.isTask.rmsRatio; 
-end
+% if strcmp(cfg.testingDevice,'mri') 
+% create randomized sequence for 9 runs when run =1
+% overwrites cfg.pattern.seqDesignFullExp
+cfg = makefMRISeqDesign(cfg);
+
+% overwrite the base amp
+cfg = normaliseEvent(cfg);
+
+cfg.pattern.F0sAmps = cfg.baseAmp * cfg.pattern.F0sAmpGain * ...
+    cfg.isTask.rmsRatio;
+% end
 
 
 

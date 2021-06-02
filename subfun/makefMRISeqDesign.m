@@ -122,7 +122,7 @@ end
 function cfg = addRandomizedTask(cfg,Design,numSequence)
 
 %create an empty cell to store the task==1s and 0s
-taskIdxMatrix =  zeros(...
+taskMatrix =  zeros(...
     numSequence, ...
     cfg.pattern.nStepsPerSequence,...
     cfg.pattern.nSegmPerStep, ...
@@ -152,36 +152,45 @@ categB = zeros(categBNum,1);
 categA(1:cfg.pattern.categANumTarget) = 1;
 categB(1:cfg.pattern.categBNumTarget) = 1;
 
-%and shuffle the order or target across seq (runs), steps, segments, ...
-idxCategATarget = Shuffle(categA);
-idxCategBTarget = Shuffle(categB);
+
+% make shuffled matrix with 1s and 0s
+taskMatrix = shuffleMe(taskMatrix, idxCategA, idxCategB, categA, categB);
 
 
-%save it to expParams for using the order in makeSequence.m
-taskIdxMatrix(idxCategA)= idxCategATarget;
-taskIdxMatrix(idxCategB)= idxCategBTarget;
-
-% control for all the beginning on runs == beginning of
-% sequences
-% A(irun,1,1,1) is equal to A(irun)
-
-%think about below:
-% if sum([taskIdxMatrix(irun,:,:,:)]) > 12 shuffle again?
-for irun=1:length(taskIdxMatrix)
-    while taskIdxMatrix(irun) == 1
+% control point 1
+% for all the beginning on runs == beginning of
+for iRun=1:length(taskMatrix)
+    
+    while taskMatrix(iRun) == 1
         
-        idxCategATarget = Shuffle(categA);
-        idxCategBTarget = Shuffle(categB);
-        taskIdxMatrix(idxCategA)= idxCategATarget;
-        taskIdxMatrix(idxCategB)= idxCategBTarget;
+        taskMatrix = shuffleMe(taskMatrix, idxCategA, idxCategB, categA, categB);
         
     end
-    if taskIdxMatrix(irun)
+    if taskMatrix(iRun)
         sprintf('There''s a target in the first pattern!');
     end
+    
 end
 
-cfg.pattern.taskIdxMatrix = taskIdxMatrix;
+% control point 2
+% 2. omit repetition 1 1 : sequential targets
+% find the repeting 1s
+taskIndices = find(taskMatrix == 1);
+
+% shuffle the matrix till no more sequential repeating 1s
+while taskIndices(diff(taskIndices)==1)
+    
+    taskMatrix = shuffleMe(taskMatrix, idxCategA, idxCategB, categA, categB);
+    taskIndices = find(taskMatrix == 1);
+    
+end
+    
+
+% control point 3 not yet implemented:
+% if sum([taskIdxMatrix(irun,:,:,:)]) > 12 shuffle again
+
+% lastly, assign it into cfg to call later
+cfg.pattern.taskIdxMatrix = taskMatrix;
 
 end
 
@@ -222,7 +231,17 @@ end
 end
 
 
+function taskMatrix = shuffleMe(taskMatrix, idxCategA, idxCategB, categA, categB)
 
+%and shuffle the order or target across seq (runs), steps, segments, ...
+idxCategATarget = Shuffle(categA);
+idxCategBTarget = Shuffle(categB);
+
+% put conditions together in order
+taskMatrix(idxCategA)= idxCategATarget;
+taskMatrix(idxCategB)= idxCategBTarget;
+
+end
 
 
 

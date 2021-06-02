@@ -213,19 +213,6 @@ cfg.keyboard.keyboard = [];
 cfg.keyboard.responseBox = [];
 
 
-% %behavioral exp keys to check
-% cfg.keywait         = KbName({'RETURN'}); % press enter to start bloc
-% cfg.keyquit         = KbName('ESCAPE'); % press ESCAPE at response time to quit
-% cfg.keyToggleInstr  = KbName({'I'}); % press I to show/remove general instructions from the screen
-% cfg.keytap          = KbName('SPACE');
-% cfg.keyVolUp        = KbName('UpArrow');
-% cfg.keyVolDown      = KbName('DownArrow');
-% cfg.keyAudioPlay    = KbName('p');
-% cfg.keyAudioStop    = KbName('s');
-% cfg.keyInstrBack    = KbName('b');
-% cfg.keyInstrNext    = KbName('n');
-
-
 if strcmpi(cfg.testingDevice, 'mri')
     cfg.keyboard.keyboard = [];
     cfg.keyboard.responseBox = [];
