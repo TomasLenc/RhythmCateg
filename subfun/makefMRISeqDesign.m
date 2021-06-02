@@ -44,7 +44,7 @@ if runNb == 1
         cfg.pattern.patternB, cfg);
     
     % get design pseudorandomized A/B if it's BlockDesign
-    if strcmp(cfg.task.name,'RhythmBlock')
+    if strcmp(cfg.task.name,'RhythmBlock') || strcmp(cfg.task.name,'Nonmetric')
         [DesignCateg, DesignSegment] = addRandomCategOrder(cfg, ...
             DesignCateg, ...
             DesignSegment);
