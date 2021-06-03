@@ -1,7 +1,7 @@
-function responseEvents = collectAndSave(cfg, logFile, experimentStart)
+function collectAndSave(responseEvents, cfg, logFile, experimentStart)
 
     target = cfg.target;
-    responseEvents = getResponse('check', cfg.keyboard.responseBox, cfg);
+%     responseEvents = getResponse('check', cfg.keyboard.responseBox, cfg);
 
     if isfield(responseEvents(1), 'onset') && ~isempty(responseEvents(1).onset)
 

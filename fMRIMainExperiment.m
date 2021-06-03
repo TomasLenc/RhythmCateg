@@ -111,7 +111,8 @@ try
     WaitSecs(cfg.timing.endResponseDelay);
 
     % save response & target
-    responseEvents = collectAndSave(cfg, ...
+    responseEvents = getResponse('check', cfg.keyboard.responseBox, cfg);
+    collectAndSave(responseEvents, cfg, ...
         logFile, cfg.experimentStart);
     
 
