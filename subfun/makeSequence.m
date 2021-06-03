@@ -328,7 +328,7 @@ for stepi=1:cfg.pattern.nStepsPerSequence
         
         % boool flag, do the nonmetric scambling 
         DO_NONMETRIC = 0;
-        if isfield(cfg.pattern,'doNonMetric')
+        if isfield(cfg.pattern,'doNonMetric') && strcmp(currCategLabel,'complex')
                 DO_NONMETRIC = 1;
                 ioiScrambleRatio = cfg.pattern.ioiScrambleRatio;
         end
