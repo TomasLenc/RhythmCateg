@@ -92,7 +92,8 @@ try
     % ===========================================
     % stimulus save for BIDS
     % ===========================================
-    target = collectAndSaveEvents(cfg, logFile, currSeq,iSequence, onset);
+    cfg.target = sum([currSeq.isTask]);
+    collectAndSaveEvents(cfg, logFile, currSeq, iSequence, onset);
    
     %% Wait for audio and delays to catch up
     % stay here till audio stops & check esc key press
@@ -110,7 +111,6 @@ try
     WaitSecs(cfg.timing.endResponseDelay);
 
     % save response & target
-    cfg.target = target;
     responseEvents = collectAndSave(cfg, ...
         logFile, cfg.experimentStart);
     

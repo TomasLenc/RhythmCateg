@@ -1,4 +1,4 @@
-function target = collectAndSaveEvents(cfg, logFile, currentSequence,SeqNum, audioOnset)
+function collectAndSaveEvents(cfg, logFile, currentSequence,SeqNum, audioOnset)
 
 experimentStart = cfg.experimentStart;
 
@@ -33,12 +33,13 @@ for iPattern = 1:numel(currentSequence)
   
     
 %     % adding compulsory BIDS structures
-%     currentSequence(iPattern, 1).trial_type  = currentSequence(iPattern, 1).segmentCateg; %'dummy'
+%     currentSequence(iPattern, 1).trial_type  = ...
+%         currentSequence(iPattern, 1).segmentCateg; %'dummy'
 %     currentSequence(iPattern, 1).duration    = 2.28;
     
     % adding other interest
     currentSequence(iPattern, 1).sequenceNum = SeqNum;
-    target(iPattern, 1) = currentSequence(iPattern, 1).isTask;
+%     target(iPattern, 1) = currentSequence(iPattern, 1).isTask;
     
 end
 
