@@ -33,15 +33,14 @@ try
     % create  logfile with extra columns to save - BIDS
     logFile.extraColumns = cfg.extraColumns;
     [logFile]  = saveEventsFile('init', cfg, logFile); %dummy initialise
-
+    
     % set the real length of columns
     logFile(1).extraColumns.LHL24.length = 12;
     logFile(1).extraColumns.PE4.length = 12;
 
     % actual inititalization
     logFile = saveEventsFile('open', cfg, logFile);
-
-    
+   
     % Show instructions for fMRI task & wait for space press
     standByScreen(cfg);
 
