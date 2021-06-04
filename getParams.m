@@ -39,7 +39,7 @@ cfg.dir.output = fullfile(...
 
 %% Debug mode settings
 cfg.debug.do        = false ;  
-cfg.debug.transpWin = true ;     % To test the script with trasparent full size screen
+cfg.debug.transpWin = false ;     % To test the script with trasparent full size screen
 cfg.debug.smallWin  = false;
 cfg.verbose         = 1;        % add here and there some explanations with if verbose is ON. [0 1 2 ]
 
@@ -113,11 +113,9 @@ if strcmpi(cfg.testingDevice,'mri')
     cfg.fixation.yDisplacement          = 0;    % Manual displacement of the fixation cross
     cfg.fixation.color                  = cfg.color.white;
     
-%     cfg.ctrlscreen.idx = min(Screen('Screens'));
-%     
-%     if cfg.screen.winWidth < 1920
-%         cfg.fixation.width = .2;
-%     end
+%   if it is sitmulation laptop:   
+%   cfg.fixation.width = .9;
+
 
     %Task
     cfg.task.instruction = ['If you saw a shiny ! point, don''t mind it. It''s OK! \n\n\n'...
