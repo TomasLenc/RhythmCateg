@@ -1,12 +1,6 @@
 function     cfg = getNonmetricParameters(cfg)
-% this function generates audio sequences to be played in the man
-% experiment
-
-
-% % %
-% start the sequence with one B-category segment that will be discarded during analysis
-% % %
-
+% this function generates simple and nonmetric audio sequences 
+% to be played in the main experiment
 
 
 %% contruct individual sound events (that will make up each pattern)
@@ -54,7 +48,7 @@ cfg.pattern.changeGridIOIStep       = 0;
 
 % ratio with which half of IOIs in each category (2, 3, 4 gridpoints)
 % is lenghtened/shortened (within each segment)
-cfg.pattern.ioiScrambleRatio = 0.43; 
+cfg.pattern.ioiScrambleRatio = 0.53; 
 
 % instead of simple vs. complex, we will have simple vs. non-metric
 cfg.pattern.doNonMetric = 1;
