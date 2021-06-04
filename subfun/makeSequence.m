@@ -368,7 +368,11 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             end
 
             currSegmIOIs = currSegmIOIsNonmetric; 
+            
+            % re-write the segment category if it is nonmetric                               
+            [seq(patIdx,1).segmentCateg]   = deal('nonmetric');
         end
+        
 
 
 
@@ -394,8 +398,11 @@ for stepi=1:cfg.pattern.nStepsPerSequence
             else
                 patternOnsetTimeWrtSegm = 0; 
             end
+            
+            %add into structure
             seq(patIdx(pati),1).soundOnsetTimesWrtSegm = patternOnsetTimeWrtSegm + ...
-                                                 cumsum([0, currPatIOIs(1:end-1)]);    
+                                                 cumsum([0, currPatIOIs(1:end-1)]);  
+
 
             % if this is the last pattern in the segment, we need to add one IOI for completeness                               
             if pati==length(patIdx)
