@@ -1,6 +1,5 @@
 
 %%
-
 % Clear all the previous stuff
 if ~ismac
     close all;
@@ -13,9 +12,9 @@ end
 % make sure we got access to all the required functions and inputs
 initEnv();
 
-% Define the task = 'RhythmFT', 'PitchFT', 'RhythmBlock'
+% Define the task = 'RhythmFT', 'RhythmBlock', 'Nonmetric'
 % Get parameters by providing task name
-cfg = getParams('RhythmFT');
+cfg = getParams('Nonmetric');
 
 
 
@@ -33,7 +32,7 @@ try
 
     % create  logfile with extra columns to save - BIDS
     logFile.extraColumns = cfg.extraColumns;
-    [logFile]  = saveEventsFile('open', cfg, logFile); %dummy initialise
+    [logFile]  = saveEventsFile('init', cfg, logFile); %dummy initialise
 
     % set the real length of columns
     logFile(1).extraColumns.LHL24.length = 12;
@@ -41,10 +40,6 @@ try
 
     % actual inititalization
     logFile = saveEventsFile('open', cfg, logFile);
-    
-    % create response file - used for counting button press
-    responseFile.extraColumns = cfg.responseExtraColumns;
-    responseFile  = saveEventsFile('open_stim', cfg, responseFile);
 
     
     % Show instructions for fMRI task & wait for space press
@@ -97,7 +92,8 @@ try
     % ===========================================
     % stimulus save for BIDS
     % ===========================================
-    target = collectAndSaveEvents(cfg, logFile, currSeq,iSequence, onset);
+    cfg.target = sum([currSeq.isTask]);
+    collectAndSaveEvents(cfg, logFile, currSeq, iSequence, onset);
    
     %% Wait for audio and delays to catch up
     % stay here till audio stops & check esc key press
@@ -115,9 +111,9 @@ try
     WaitSecs(cfg.timing.endResponseDelay);
 
     % save response & target
-    cfg.target = target;
-    responseEvents = collectAndSave(cfg, ...
-        responseFile, cfg.experimentStart);
+    responseEvents = getResponse('check', cfg.keyboard.responseBox, cfg);
+    collectAndSave(responseEvents, cfg, ...
+        logFile, cfg.experimentStart);
     
 
     %% wrapping up
@@ -142,7 +138,6 @@ try
     %% save
     % Close the logfiles (tsv)   - BIDS
     saveEventsFile('close', cfg, logFile);
-    saveEventsFile('close', cfg, responseFile);
 
     % save the whole workspace
     matFile = fullfile(cfg.dir.output, ...
@@ -154,7 +149,6 @@ try
     end
 
     createJson(cfg, 'func');
-    %createJson(cfg, cfg);
     
     % clean the workspace
     cleanUp;

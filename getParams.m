@@ -39,9 +39,9 @@ cfg.dir.output = fullfile(...
 
 %% Debug mode settings
 cfg.debug.do        = false ;  
-cfg.debug.transpWin = false ;     % To test the script with trasparent full size screen
+cfg.debug.transpWin = true ;     % To test the script with trasparent full size screen
 cfg.debug.smallWin  = false;
-cfg.verbose         = true;        % add here and there some explanations with if verbose is ON. 
+cfg.verbose         = 1;        % add here and there some explanations with if verbose is ON. [0 1 2 ]
 
     
 %% MRI settings
@@ -138,10 +138,8 @@ if strcmpi(cfg.testingDevice,'mri')
     cfg.extraColumns = {'sequenceNum', 'segmentNum', 'segmentOnset', ...
     'stepNum', 'stepOnset', 'patternID', 'segmentCateg', 'F0', 'isTask', ...
     'gridIOI', 'patternAmp', 'minPE4', 'rangePE4', 'minLHL24', ...
-    'rangeLHL24', 'LHL24', 'PE4'};
+    'rangeLHL24', 'LHL24', 'PE4','keyName', 'pressed', 'target'};
 
-    % response columns
-    cfg.responseExtraColumns = {'keyName', 'pressed', 'target'};
 
 end
 
@@ -172,6 +170,10 @@ elseif strcmp(cfg.task.name,'PitchFT')
     
     cfg = getPitchParameters(cfg);
     
+elseif strcmp(cfg.task.name,'Nonmetric')
+    
+    cfg = getNonmetricParameters(cfg);
+    
 end
 
 
@@ -196,8 +198,9 @@ end
 % then you can assign device number to the main keyboard or the response
 % box. 
 % otherwise it's set for PTB to assign. 
-[keyboardNumbers, keyboardNames] = GetKeyboardIndices;
 
+% [keyboardNumbers, keyboardNames] = GetKeyboardIndices;
+% 
 % disp(keyboardNumbers);
 % disp(keyboardNames);
 
@@ -281,11 +284,11 @@ cfg.color.background = cfg.color.grey;
 cfg.text.color = cfg.color.white;
 %cfg.color.foreground =  [127 127 127];
 
-% % Monitor parameters
-% if strcmpi(cfg.testingDevice, 'mri')
-%     cfg.screen.monitorWidth = 69.8;
-%     cfg.screen.monitorDistance = 170;
-% end
+% Monitor parameters
+if strcmpi(cfg.testingDevice, 'mri')
+    cfg.screen.monitorWidth = 69.8;
+    cfg.screen.monitorDistance = 170;
+end
 
 end
 
