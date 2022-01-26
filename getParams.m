@@ -23,13 +23,6 @@ function cfg = getParams(task)
 cfg = struct(); 
 
 %% set the type of your computer
-if IsWin
-    cfg.stimComp='windows';
-elseif ismac
-    cfg.stimComp = 'mac';
-elseif IsLinux
-    cfg.stimComp = 'linux';
-end
 
 
 %logfile folder - behav exp
@@ -172,6 +165,10 @@ elseif strcmp(cfg.task.name,'Nonmetric')
     
     cfg = getNonmetricParameters(cfg);
     
+elseif strcmp(cfg.task.name,'NonmetricFT')
+    
+    cfg = getNonmetricFTParameters(cfg);
+
 end
 
 

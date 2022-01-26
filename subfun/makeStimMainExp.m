@@ -35,6 +35,9 @@ soundOnsetTimes = cumsum([0, patternIOIs]);
 
 %% make envelope for the individual sound event
 
+% number of samples for the whole tone duration 
+eventSamples   = round(cfg.pattern.eventDur * cfg.fs);
+
 % number of samples for the onset ramp (proportion of gridIOI)
 ramponSamples   = round(cfg.pattern.eventRampon * cfg.fs);
 
@@ -42,11 +45,15 @@ ramponSamples   = round(cfg.pattern.eventRampon * cfg.fs);
 rampoffSamples  = round(cfg.pattern.eventRampoff * cfg.fs);
 
 % individual sound event duration defined as proportion of gridIOI
-envEvent = ones(1, round(cfg.pattern.eventDur * cfg.fs));
+envEvent = ones(1, round(cfg.pattern.gridIOIs * cfg.fs));
 
 % make the linear ramps
 envEvent(1:ramponSamples) = envEvent(1:ramponSamples) .* linspace(0,1,ramponSamples);
-envEvent(end-rampoffSamples+1:end) = envEvent(end-rampoffSamples+1:end) .* linspace(1,0,rampoffSamples);
+
+envEvent(eventSamples-rampoffSamples+1:eventSamples) = ... 
+    envEvent(eventSamples-rampoffSamples+1:eventSamples) .* linspace(1,0,rampoffSamples);
+
+envEvent(eventSamples+1:end) = 0; 
 
 %% make time vector for individual sound event 
 
